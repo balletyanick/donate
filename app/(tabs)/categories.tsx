@@ -6,7 +6,7 @@ import { StyleSheet, View, Text } from 'react-native';
 const Page = () => {
   return (
     <View style={styles.container}>
-      <Text> Index </Text>
+      <Text> Catégorie </Text>
     </View>
   );
 };
