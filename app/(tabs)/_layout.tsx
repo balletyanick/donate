@@ -12,9 +12,10 @@ export default function  Layout() {
             tabBarStyle: {
                 backgroundColor: Colors.bgColor,
                 borderTopWidth: 0,
-                height:70,
+                height:80,
                 elevation: 0,  // enlever une ombre sur android
                 shadowOpacity: 0, // enlever une ombre sur ios
+                paddingTop:15,
             },
 
             tabBarShowLabel: false,
@@ -25,16 +26,24 @@ export default function  Layout() {
             <Tabs.Screen 
             name='index' 
             options={{
-                tabBarIcon: ({ color }) => (
-                    <MaterialIcons name="home" size={35} color={color} />
+                tabBarIcon: ({ focused }) => (
+                  <Ionicons
+                    name={focused ? 'home' : 'home-outline'}
+                    size={24}
+                    color={focused ? Colors.primaryColor : 'black'}
+                  />
                 ),
             }} />
 
             <Tabs.Screen 
             name='categories' 
             options={{
-                tabBarIcon: ({ color }) => (
-                    <MaterialIcons name="space-dashboard" size={28} color={color} />
+                tabBarIcon: ({ focused }) => (
+                    <Ionicons 
+                    name={focused ? 'business' : 'business-outline'}
+                    size={24} 
+                    color={focused ? Colors.primaryColor : 'black'}
+                />
                 ),
             }} />
 
@@ -58,17 +67,25 @@ export default function  Layout() {
             <Tabs.Screen 
             name='liste' 
             options={{
-                tabBarIcon: ({ color }) => (
-                    <Ionicons name='bookmark' size={28} color={color} />
+                tabBarIcon: ({ focused }) => (
+                    <Ionicons 
+                    name={focused ? 'list-circle' : 'list-circle-outline'}
+                    size={28} 
+                    color={focused ? Colors.primaryColor : 'black'}
+                    />
                 ),
             }} />
 
 
             <Tabs.Screen 
-            name='profile' 
+            name='setting' 
             options={{
-                tabBarIcon: ({ color }) => (
-                    <FontAwesome name='user' size={28} color={color} />
+                tabBarIcon: ({ focused }) => (
+                    <Ionicons 
+                    name={focused ? 'settings' : 'settings-outline'}
+                    size={24} 
+                    color={focused ? Colors.primaryColor : 'black'} 
+                    />
                 ),
             }} />
 
