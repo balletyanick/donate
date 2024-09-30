@@ -7,7 +7,6 @@ import { useHeaderHeight } from '@react-navigation/elements';
 
 export default function ValiderCode() {
   const headerHeight = useHeaderHeight(); 
-  const [passwordVisible, setPasswordVisible] = useState(false);
 
   return (
     <>

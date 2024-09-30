@@ -36,7 +36,7 @@ const Page = () => {
         </View>
 
         {/* Menu Section */}
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
 
           <View style={styles.block}>
             <TouchableOpacity onPress={() => {router.push('/avatar')}} > 

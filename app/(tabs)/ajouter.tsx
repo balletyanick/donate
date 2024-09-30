@@ -25,7 +25,7 @@ export default function UploadImage() {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const onChangeDate = (event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || 'date';
+    const currentDate = selectedDate;
     setShowDatePicker(false);
     setDate(currentDate);
   };
@@ -46,7 +46,7 @@ export default function UploadImage() {
 
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView style={[styles.container, { paddingTop: headerHeight }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <ScrollView>
+          <ScrollView showsVerticalScrollIndicator={false}>
 
             <TouchableOpacity style={styles.uploadBox} onPress={UploadImg}>
               {image ? (
@@ -68,6 +68,17 @@ export default function UploadImage() {
               />
             </View>
 
+            <View style={styles.boxinput}>
+              <Text> Description </Text>
+              <TextInput  
+                placeholder='Saisir la description' 
+                placeholderTextColor='#11182744' 
+                multiline
+                numberOfLines={4}
+                style={styles.inputdes}
+              />
+            </View>
+
 
             <View style={{ marginBottom: 40,   zIndex: 1000,  }}>
               <Text> Catégories </Text>
@@ -85,23 +96,6 @@ export default function UploadImage() {
             </View>
 
             <View style={styles.boxinput}>
-              <Text> Date de fin </Text>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
-                <Text style={{ color: date ? Colors.black : '#11182744' }}>
-                  {date ? date.toLocaleDateString('fr-FR') : 'Sélectionnez une date'}
-                </Text>
-              </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={date || new Date()}
-                  mode="date"
-                  display="default"
-                  onChange={onChangeDate}
-                />
-              )}
-            </View>
-
-            <View style={styles.boxinput}>
               <Text> Montant </Text>
               <TextInput  
                 placeholder='Saisir le montant' 
@@ -111,14 +105,20 @@ export default function UploadImage() {
             </View>
 
             <View style={styles.boxinput}>
-              <Text> Description </Text>
-              <TextInput  
-                placeholder='Saisir la description' 
-                placeholderTextColor='#11182744' 
-                multiline
-                numberOfLines={4}
-                style={styles.inputdes}
-              />
+              <Text> Date de fin </Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
+                <Text style={{ color: date ? Colors.black : '#11182744' }}>
+                  {date ? date.toLocaleDateString('fr-FR') : 'Sélectionnez une date'}
+                </Text>
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display="calendar"
+                  onChange={onChangeDate}
+                />
+              )}
             </View>
 
             <View style={styles.boxinput}>
@@ -129,6 +129,10 @@ export default function UploadImage() {
                 style={styles.input}
               />
             </View>
+
+            <TouchableOpacity style={styles.button} onPress={() =>  {router.push('/(auth)/newpwd')} }>
+              <Text style={styles.buttonText}> Enregistrer </Text>
+            </TouchableOpacity>
 
           </ScrollView>
         </KeyboardAvoidingView>
@@ -213,5 +217,20 @@ const styles = StyleSheet.create({
 dropdownContainer: {
   backgroundColor: Colors.bgColor,
   borderColor: Colors.bgColor,
-}
+},
+
+button: {
+  backgroundColor: Colors.primaryColor,
+  paddingVertical: 15,
+  borderRadius: 10,
+  alignItems: 'center',
+  marginTop: 15,
+  marginBottom: 30,
+},
+
+buttonText: {
+  color: Colors.white,
+  fontSize: 18,
+  fontWeight: 'bold',
+},
 });
