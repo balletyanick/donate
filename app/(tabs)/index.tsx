@@ -21,9 +21,13 @@ const Page = () => {
             headerTitle: "",
             headerLeft: () => (
                 <TouchableOpacity onPress={() => {}}  style={{ marginLeft:20 }}>
-                    <Image 
+                    {/*<Image 
                         source={require('../../assets/images/avatar.jpg')}
                         style={{width:40, height:40, borderRadius:10}}
+                    />*/}
+                    <Ionicons  
+                        name='person-circle-outline'
+                        size={22} color={Colors.black} style={styles.IconNotif}
                     />
                 </TouchableOpacity>
             ),

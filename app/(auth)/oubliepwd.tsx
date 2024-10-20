@@ -4,10 +4,71 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import Colors from "@/constants/Colors";
 import { useHeaderHeight } from '@react-navigation/elements';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator } from 'react-native';
+
 
 export default function oubliepwd() {
   const headerHeight = useHeaderHeight(); 
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // chargement
+
+  // États pour chaque champ du formulaire
+  const [phone, setPhone] = useState('');
+
+   // États pour gérer les erreurs
+   const [errors, setErrors] = useState({ phone: ''}); 
+   const [serverError, setServerError] = useState('');
+
+   const validateForm = () => {
+    let valid = true;
+    let newErrors = { phone: ''}
+  
+    if (!phone) {
+      newErrors.phone = 'Le numéro de téléphone est obligatoire..';
+      valid = false;
+    } else if (phone.length !== 10) {
+      newErrors.phone = 'Le numero de téléphone doit etre composé de 10 chiffres.';
+      valid = false;
+    }
+  
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const handleSubmit = async () => {
+    if (validateForm()) {
+      try {
+        setIsLoading(true); // demarrage chargement
+        const response = await axios.post('https://donate.balambio.com/api/request_reset', {
+          phone,
+        });
+
+        // Récupérer le token et le stocker dans AsyncStorage
+        const token = response.data.token;
+        await AsyncStorage.setItem('userToken', token);
+
+        if (response.status === 200) {
+          router.push('/(auth)/validecodepwd'); // Redirection vers une autre page
+        } 
+        else if (response.status === 404) {
+          setServerError("Utilisateur non trouvé");
+          return;
+        } 
+      }
+      
+      catch (error) {
+        setServerError('Problème de connexion internet');
+      }
+
+      finally {
+        setIsLoading(false); // Arrête le chargement après la requête
+      }
+    }
+  };
+
+
 
   return (
     <>
@@ -56,10 +117,13 @@ export default function oubliepwd() {
               placeholder='Numéro de Téléphone' 
               placeholderTextColor='black' 
               style={styles.input}
+              value={phone}
+              onChangeText={setPhone}
             />
           </View>
+          {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}
 
-          <TouchableOpacity style={styles.button} onPress={() => {router.push('/(auth)/validecode')} }>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}> Confirmer </Text>
           </TouchableOpacity>
 
@@ -141,5 +205,11 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 18,
     fontWeight: 'bold',
+  },
+
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
 });

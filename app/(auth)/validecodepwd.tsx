@@ -77,7 +77,7 @@ export default function ValiderCode() {
         );
   
         if (response.status === 200) {
-          router.push('/(tabs)/');
+          router.push('/(auth)/newpwd');
         } 
         else if (response.status === 404) {
           setServerError("Utilisateur non trouvé");

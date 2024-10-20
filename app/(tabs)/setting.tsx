@@ -1,12 +1,28 @@
 import { Feather, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Stack, router } from 'expo-router';
-import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Colors from '@/constants/Colors';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+
 
 const Page = () => {
-  const headerHeight = useHeaderHeight(); 
+  const headerHeight = useHeaderHeight();
+  const [user, setUser] = useState(null); // État pour stocker les informations de l'utilisateur 
+
+  const logout = async () => {
+    try {
+      await AsyncStorage.removeItem('userToken');
+      setUser(null); // Réinitialiser l'état de l'utilisateur
+      // Rediriger vers la page de login si nécessaire
+      router.push('/login');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion : ', error);
+    }
+  };
+
 
   return (
     <>
@@ -99,7 +115,7 @@ const Page = () => {
             </View>
           </View>
 
-          <View style={styles.block}>
+          <View style={styles.block2}>
             <View style={styles.menuItem}>
               <Ionicons name="share-outline" size={24} color="#333" />
               <Text style={styles.menuText}> Partager  </Text>
@@ -112,6 +128,12 @@ const Page = () => {
               <Text style={styles.menuText}> A Propos </Text>
               <Feather name="chevron-right" size={20} color="#333" style={styles.chevronIcon} />
             </View>
+          </View>
+
+          <View style={styles.boxLogout}>
+            <TouchableOpacity onPress={logout}>
+              <Text style={styles.TxtLogout}> Deconnexion </Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </View>
@@ -133,6 +155,17 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical:5,
     marginBottom: 25,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+  },
+
+  block2: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    paddingVertical:5,
+    marginBottom: 15,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 5,
@@ -196,5 +229,15 @@ const styles = StyleSheet.create({
   chevronIcon: {
     opacity: 0.7,
   },
-  
+
+  boxLogout: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+
+  TxtLogout: {
+    color: "red",
+    fontSize: 16,
+  },
 });

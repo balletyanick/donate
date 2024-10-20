@@ -4,10 +4,80 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import Colors from "@/constants/Colors";
 import { useHeaderHeight } from '@react-navigation/elements';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator } from 'react-native';
 
 export default function NewPassword() {
   const headerHeight = useHeaderHeight(); 
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // chargement
+
+    // États pour chaque champ du formulaire
+    const [password, setPassword] = useState('');
+  
+    // États pour gérer les erreurs
+    const [errors, setErrors] = useState({ password: '' }); 
+    const [serverError, setServerError] = useState('');
+
+    const validateForm = () => {
+      let valid = true;
+      let newErrors = { password: ''}
+    
+      if (!password) {
+        newErrors.password = 'Le mot de passe est obligatoire.';
+        valid = false;
+      } else if (password.length < 3) {
+        newErrors.password = 'Le mot de passe doit contenir au moins 3 caractères.';
+        valid = false;
+      }
+    
+      setErrors(newErrors);
+      return valid;
+    };
+
+
+
+    const handleSubmit = async () => {
+      if (validateForm()) {
+        try {
+          
+          setIsLoading(true); // demarrage chargement
+          const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
+    
+          if (!token) {
+            setServerError("Erreur d'authentification, veuillez réessayer.");
+            return;
+          }
+    
+          // Envoyer le code de vérification au serveur
+          const response = await axios.post(
+            'https://donate.balambio.com/api/password_reset',{ password },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+    
+          if (response.status === 200) {
+            router.push('/(tabs)/');
+          } 
+          else if (response.status === 404) {
+            setServerError("Utilisateur non trouvé");
+            return;
+          } 
+        } 
+  
+        catch (error) {
+          setServerError("Problème de connexion internet");
+        }
+  
+        finally {
+          setIsLoading(false); // Arrête le chargement après la requête
+        }
+      }
+    };
 
   return (
     <>
@@ -36,7 +106,6 @@ export default function NewPassword() {
           </TouchableOpacity>
         </View>
 
-
         <View style={styles.textContainer}>
           <Text style={styles.titre}>Nouveau mot de passe </Text>
           <Text style={styles.desTitre}>
@@ -45,10 +114,7 @@ export default function NewPassword() {
           </Text>
         </View>
 
-
-
         <View>
-          
           <View style={styles.inputContainer}>
             <Ionicons 
               name='lock-closed-outline' 
@@ -57,10 +123,12 @@ export default function NewPassword() {
               color={Colors.black} 
             />
             <TextInput  
-              placeholder='Mot de Passe' 
+              placeholder='Nouveau Mot de Passe' 
               placeholderTextColor='black' 
               secureTextEntry={!passwordVisible} 
               style={[styles.input, { paddingRight: 40 }]} 
+              value={password}
+              onChangeText={setPassword}
             />
 
             <TouchableOpacity 
@@ -73,35 +141,14 @@ export default function NewPassword() {
                 color="gray" />
             </TouchableOpacity>
           </View>
+          {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+          {serverError && (<Text style={styles.errorText}> {serverError} </Text> )} 
 
-          <View style={[styles.inputContainer, { marginTop: 15 }]}>
-            <Ionicons 
-              name='lock-closed-outline' 
-              size={22} 
-              style={styles.icon} 
-              color={Colors.black} 
-            />
-            <TextInput  
-              placeholder='Confirmer le Mot de Passe' 
-              placeholderTextColor='black' 
-              secureTextEntry={!passwordVisible} 
-              style={[styles.input, { paddingRight: 40 }]} 
-            />
-
-            <TouchableOpacity 
-              onPress={() => setPasswordVisible(!passwordVisible)} 
-              style={styles.eyeIcon}>
-
-              <Ionicons
-                name={passwordVisible ? 'eye-off' : 'eye'}
-                size={24}
-                color="gray" />
-            </TouchableOpacity>
-          </View>
-
-
-          <TouchableOpacity style={styles.button} onPress={() =>  {router.push('/(tabs)')} } >
-            <Text style={styles.buttonText}> Confirmer </Text>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={isLoading}>
+          {
+            isLoading ? ( <ActivityIndicator size="small" color={Colors.white} />) : ( 
+            <Text style={styles.buttonText}> Confirmer </Text>  )
+          }
           </TouchableOpacity>
 
         </View>
@@ -182,5 +229,11 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 18,
     fontWeight: 'bold',
+  },
+
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
   },
 });
