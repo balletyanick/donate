@@ -1,6 +1,3 @@
-
-
-
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -8,20 +5,16 @@ import Colors from '@/constants/Colors';
 import { Stack, router } from 'expo-router';
 import { useHeaderHeight } from '@react-navigation/elements';
 import DropDownPicker from 'react-native-dropdown-picker';
+import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function UploadImage() {
-  const [image, setImage] = useState(null);
-  const UploadImg = () => {};
   const headerHeight = useHeaderHeight(); 
   const [open, setOpen] = useState(false); // Dropdown
   const [value, setValue] = useState(null); // Dropdown
-  const [items, setItems] = useState([
-    { label: 'Education', value: 'Education' },
-    { label: 'ONG', value: 'ONG' },
-  ]);
-
-  const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const onChangeDate = (event: any, selectedDate?: Date) => {
@@ -29,6 +22,142 @@ export default function UploadImage() {
     setShowDatePicker(false);
     setDate(currentDate);
   };
+
+  // États pour chaque champ du formulaire
+  const [image, setImage] = useState(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState([
+    { label: 'Education', value: 'Education' }, { label: 'ONG', value: 'ONG' },
+    { label: 'Soins de santé', value: 'Soins de santé' }, { label: 'Art & Culture', value: 'Art & Culture' },
+    { label: 'Autre', value: 'Autre' },
+  ]);
+  const [amount, setAmount] = useState('');
+  const [city, setCity] = useState('');
+  const [link_justify, setLink_justify] = useState('');
+  const [date, setDate] = useState(new Date());
+
+
+  // États pour gérer les erreurs
+  const [errors, setErrors] = useState({ image: '', title: '', description: '', 
+  category: '', amount: '', city: '', link_justify:'', date:''});
+  const [serverError, setServerError] = useState('');
+
+
+  const validateForm = () => {
+    const today = new Date();
+    let valid = true;
+    let newErrors = { image: '', title: '', description: '', 
+      category: '', amount: '', city: '', link_justify:'', date:''}
+  
+    if (!image) {
+      newErrors.image = 'Veuillez téléverser une image.';
+      valid = false;
+    }
+  
+    if (!title) {
+      newErrors.title = 'Le title est obligatoire.';
+      valid = false;
+    } else if (title.length < 3) {
+      newErrors.title = 'Le title doit contenir au moins 3 caractères.';
+      valid = false;
+    }
+  
+    if (!description) {
+      newErrors.description = 'La description est obligatoire.';
+      valid = false;
+    } else if (description.length < 3) {
+      newErrors.description = 'La description doit contenir au moins 3 caractères.';
+      valid = false;
+    }
+  
+    if (!value) {
+      newErrors.category = 'Veuillez sélectionner une catégorie.';
+      valid = false;
+    }
+  
+    if (!amount) {
+      newErrors.amount = 'Le montant est obligatoire.';
+      valid = false;
+    } else if (amount.length < 3) {
+      newErrors.amount = 'Le montant doit contenir au moins 3 caractères.';
+      valid = false;
+    }
+  
+    if (!city) {
+      newErrors.city = 'La localisation est obligatoire.';
+      valid = false;
+    } else if (city.length < 3) {
+      newErrors.city = 'La localisation doit contenir au moins 3 caractères.';
+      valid = false;
+    }
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const UploadImg = async () => {
+    // demande de permission
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("L'autorisation d'accéder aux photos est requise !");
+      return;
+    }
+    // Ouvrir le sélecteur d'images
+    const result = await ImagePicker.launchImageLibraryAsync();
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };  
+
+
+  const handleSubmit = async () => {
+    if (validateForm()) {
+      const formData = new FormData(); 
+      formData.append('picture', {
+        uri: image,
+        name: 'image.jpg',
+        type: 'image/jpeg'
+      });
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('category', value);
+      formData.append('amount', amount);
+      formData.append('city', city);
+      formData.append('link_justify', link_justify);
+      formData.append('date_end', date.toISOString().split('T')[0]);
+  
+      try {
+        const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
+
+        if (!token) {
+          setServerError("Problème d'authentification");
+        }
+  
+        const response = await axios.post('http://localhost:8000/api/add_cagnotte', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (response.status === 200) {
+          alert('Cagnotte ajoutée avec succès');
+          router.push('/(tabs)/'); // exemple de redirection
+        }
+      } 
+      
+      catch (error) {
+        setServerError("Problème de connexion internet");
+      }
+    }
+  };
+  
+
+
+
+ 
 
   return (
     <>
@@ -44,11 +173,10 @@ export default function UploadImage() {
         ),
       }} />
 
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView style={[styles.container, { paddingTop: headerHeight }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <ScrollView showsVerticalScrollIndicator={false}>
 
-            <TouchableOpacity style={styles.uploadBox} onPress={UploadImg}>
+            <TouchableOpacity style={image ? styles.uploadBoxSelected : styles.uploadBox} onPress={UploadImg}>
               {image ? (
                 <Image source={{ uri: image }} style={styles.image} />
               ) : (
@@ -57,15 +185,19 @@ export default function UploadImage() {
                   <Text style={styles.uploadText}> Téléverser une image </Text>
                 </>
               )}
+              {errors.image ? <Text style={styles.errorText}>{errors.image}</Text> : null}
             </TouchableOpacity>
 
             <View style={styles.boxinput}>
-              <Text> Titre </Text>
+              <Text> title </Text>
               <TextInput  
-                placeholder='Saisir le titre' 
+                placeholder='Saisir le title' 
                 placeholderTextColor='#11182744'  
                 style={styles.input}
+                value={title}
+                onChangeText={setTitle}
               />
+            {errors.title ? <Text style={styles.errorText}>{errors.title}</Text> : null}
             </View>
 
             <View style={styles.boxinput}>
@@ -76,23 +208,26 @@ export default function UploadImage() {
                 multiline
                 numberOfLines={4}
                 style={styles.inputdes}
+                value={description}
+                onChangeText={setDescription}
               />
+              {errors.description ? <Text style={styles.errorText}>{errors.description}</Text> : null}
             </View>
 
-
-            <View style={{ marginBottom: 40,   zIndex: 1000,  }}>
+            <View style={{ marginBottom: 25,   zIndex: 1000,  }}>
               <Text> Catégories </Text>
               <DropDownPicker
                 open={open}
                 value={value}
-                items={items}
+                items={category}
                 setOpen={setOpen}
                 setValue={setValue}
-                setItems={setItems}
+                setItems={setCategory}
                 placeholder="Sélectionnez une catégorie"
                 style={styles.dropdown}
                 dropDownContainerStyle={styles.dropdownContainer}
               />
+              {errors.category ? <Text style={{  color: 'red',fontSize: 12,marginTop: 15,}}>{errors.category}</Text> : null}
             </View>
 
             <View style={styles.boxinput}>
@@ -101,7 +236,22 @@ export default function UploadImage() {
                 placeholder='Saisir le montant' 
                 placeholderTextColor='#11182744' 
                 style={styles.input}
+                value={amount}
+                onChangeText={setAmount}
               />
+            {errors.amount ? <Text style={styles.errorText}>{errors.amount}</Text> : null}
+            </View>
+
+            <View style={styles.boxinput}>
+              <Text> Ville </Text>
+              <TextInput  
+                placeholder='Saisir la ville' 
+                placeholderTextColor='#11182744' 
+                style={styles.input}
+                value={city}
+                onChangeText={setCity}
+              />
+            {errors.city ? <Text style={styles.errorText}>{errors.city}</Text> : null}
             </View>
 
             <View style={styles.boxinput}>
@@ -119,24 +269,27 @@ export default function UploadImage() {
                   onChange={onChangeDate}
                 />
               )}
+              {errors.date ? <Text style={styles.errorText}>{errors.date}</Text> : null}
             </View>
 
             <View style={styles.boxinput}>
-              <Text> Ville </Text>
+              <Text> Lien <Text style={styles.facultatif}> (Facultatif)</Text> </Text>
               <TextInput  
-                placeholder='Saisir la ville' 
+                placeholder='Lien pour confirmer vos affirmations ' 
                 placeholderTextColor='#11182744' 
                 style={styles.input}
+                value={link_justify}
+                onChangeText={setLink_justify}
               />
+              {serverError && (<Text style={styles.errorText}> {serverError} </Text> )}
             </View>
 
-            <TouchableOpacity style={styles.button} onPress={() =>  {router.push('/(auth)/newpwd')} }>
+            <TouchableOpacity style={styles.button}  onPress={handleSubmit}>
               <Text style={styles.buttonText}> Enregistrer </Text>
             </TouchableOpacity>
 
           </ScrollView>
         </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
     </>
   );
 }
@@ -149,17 +302,32 @@ const styles = StyleSheet.create({
   },
   uploadBox: {
     width: "100%",
-    height: 150,
+    height: 180,
     borderWidth: 2,
-    borderColor: Colors.black,
-    borderStyle: "dashed",
+    borderColor: Colors.bgColor,
+    borderStyle: "solid",
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 10,
     marginBottom: 20,
     backgroundColor: '#F5F5F5',
   },
+
+  uploadBoxSelected: {
+    width: "100%",
+    height: 180,
+    borderWidth: 2,
+    borderColor: Colors.bgColor,
+    borderStyle: "solid",
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+    backgroundColor: '#F5F5F5',
+  },
+
   uploadText: {
     color: Colors.black,
     marginTop: 10,
@@ -233,4 +401,16 @@ buttonText: {
   fontSize: 18,
   fontWeight: 'bold',
 },
+
+errorText: {
+  color: 'red',
+  fontSize: 12,
+  marginTop: 5,
+},
+
+facultatif: {
+  fontSize: 12,
+},
+
+
 });

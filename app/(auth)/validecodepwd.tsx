@@ -68,7 +68,7 @@ export default function ValiderCode() {
   
         // Envoyer le code de vérification au serveur
         const response = await axios.post(
-          'https://donate.balambio.com/api/verifie_code',{ verification_code },
+          'http://localhost:8000/api/verifie_code',{ verification_code },
           {
             headers: {
               Authorization: `Bearer ${token}`,

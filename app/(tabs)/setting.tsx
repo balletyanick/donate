@@ -1,27 +1,23 @@
 import { Feather, Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import { Stack, router } from 'expo-router';
+import { Stack, router, Redirect } from 'expo-router';
 import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useHeaderHeight } from '@react-navigation/elements';
 import Colors from '@/constants/Colors';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../context/AuthContext';
+import { ActivityIndicator } from 'react-native';
 
 
-const Page = () => {
+const Page: React.FC = () => {
+
   const headerHeight = useHeaderHeight();
-  const [user, setUser] = useState(null); // État pour stocker les informations de l'utilisateur 
+  const { isLogged, loading, logout } = useAuth();
 
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem('userToken');
-      setUser(null); // Réinitialiser l'état de l'utilisateur
-      // Rediriger vers la page de login si nécessaire
-      router.push('/login');
-    } catch (error) {
-      console.error('Erreur lors de la déconnexion : ', error);
-    }
-  };
+  if (!isLogged) return <Redirect href="/(auth)/login" />;
+
+  
 
 
   return (
@@ -52,7 +48,7 @@ const Page = () => {
         </View>
 
         {/* Menu Section */}
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={true}>
 
           <View style={styles.block}>
             <TouchableOpacity onPress={() => {router.push('/avatar')}} > 
@@ -131,9 +127,15 @@ const Page = () => {
           </View>
 
           <View style={styles.boxLogout}>
-            <TouchableOpacity onPress={logout}>
-              <Text style={styles.TxtLogout}> Deconnexion </Text>
-            </TouchableOpacity>
+            {isLogged ? (
+              <TouchableOpacity onPress={logout}>
+                <Text style={styles.TxtLogout}> Deconnexion </Text>
+              </TouchableOpacity>
+              ) : (
+              <TouchableOpacity onPress={logout}>
+                <Text style={styles.TxtLogout}> Deconnexion </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </ScrollView>
       </View>

@@ -1,19 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link, Stack, router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import  Colors  from "@/constants/Colors";
 import {useHeaderHeight} from '@react-navigation/elements';
 import CategoriesButtons from '../../components/CategoriesButton';
 import List_demande from '../../components/List_demande';
 import List_ong from '../../components/List_ong';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../context/AuthContext';
+import { ActivityIndicator } from 'react-native';
 
-
-const Page = () => {
+const Page: React.FC = () => {
 
     const headerHeight = useHeaderHeight(); 
+    const { isLogged, loading } = useAuth();
+    
     return (
-
         <>
         <Stack.Screen options={{
 
@@ -21,14 +24,15 @@ const Page = () => {
             headerTitle: "",
             headerLeft: () => (
                 <TouchableOpacity onPress={() => {}}  style={{ marginLeft:20 }}>
-                    {/*<Image 
-                        source={require('../../assets/images/avatar.jpg')}
+                    {isLogged ? (
+                        <Image source={require('../../assets/images/avatar.jpg')}
                         style={{width:40, height:40, borderRadius:10}}
-                    />*/}
-                    <Ionicons  
-                        name='person-circle-outline'
+                    /> 
+                    ):(
+                    <Ionicons name='person-circle-outline'
                         size={22} color={Colors.black} style={styles.IconNotif}
                     />
+                    )}
                 </TouchableOpacity>
             ),
 
@@ -47,10 +51,15 @@ const Page = () => {
             <ScrollView showsVerticalScrollIndicator={false}> 
 
                 <View style={styles.textContainer}>
-                    <Text style={styles.headTxt}>
-                        Donnez avec le cœur, changez des vies
-                    </Text>
-
+                    {isLogged ? (
+                        <Text style={styles.headTxt}>
+                            Donnez avec le cœur, changez des vies.. 
+                        </Text>
+                    ) : (
+                        <Text style={styles.headTxt}>
+                            Donnez avec le cœur, changez des vies.
+                        </Text>
+                    )}
                     <View style={styles.boxSearch} >
 
                         <View style={styles.BarSearch} >
@@ -141,7 +150,6 @@ const styles = StyleSheet.create({
         padding: 13,   
         borderRadius: 10,
         marginLeft: 20,
-
-    }
+    },
 
 });

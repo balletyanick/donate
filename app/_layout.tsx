@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { AuthProvider } from '../context/AuthContext';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -24,6 +25,7 @@ export default function RootLayout() {
   }
 
   return (
+    <AuthProvider>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -31,5 +33,6 @@ export default function RootLayout() {
         <Stack.Screen name="(details)" options={{ headerShown: false }} />
         <Stack.Screen name="(ProfilePage)" options={{ headerShown: false }} />
       </Stack>
+    </AuthProvider>
   );
 }

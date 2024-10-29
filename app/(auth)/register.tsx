@@ -79,7 +79,7 @@ export default function Register() {
     if (validateForm()) {
       try {
         setIsLoading(true); // demarrage chargement
-        const response = await axios.post('https://donate.balambio.com/api/register', {
+        const response = await axios.post('http://localhost:8000/api/register', {
           first_name,
           last_name,
           phone,
