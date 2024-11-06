@@ -1,96 +1,58 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Stack, router, Redirect } from 'expo-router';
 import axios from 'axios';
-import { Stack, router } from 'expo-router';
 
 interface AuthContextType {
-  isLogged: boolean;
-  loading: boolean;
-  logout: () => void;
+  isAuthenticated: boolean;
+  checkAuthStatus: () => Promise<void>;
+  logout: () => Promise<void>;
 }
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
+// Créer le contexte avec un type optionnel pour éviter les erreurs d'initialisation
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [isLogged, setIsLogged] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
-          
-        if (token) {
-            setIsLogged(true);
-          } 
-        
-          else {
-            setIsLogged(false);
-          }
-      } 
-      catch (error) {
-        console.error("Erreur lors de la vérification de l'utilisateur:", error);
-      } 
-      finally {
-        setLoading(false);
-      }
-    };
-    checkUser();
-  }, []);
+  // Fonction pour vérifier l'état de connexion
+  const checkAuthStatus = async () => {
+    const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
+    setIsAuthenticated(!!token);
+  };
 
-
-
+  // Fonction pour la déconnexion
   const logout = async () => {
     try {
-      const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
+        const token = await AsyncStorage.getItem('userToken');
+        const response = await axios.post('http://localhost:8000/api/logout', {}, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+        });
 
-      // Appel à l'API pour la déconnexion
-      const response = await axios.post('http://localhost:8000/api/logout', {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+        // Si la déconnexion est réussie (status 200)
+        if (response.status === 200) {
+            await AsyncStorage.removeItem('userToken');
+            setIsAuthenticated(false);
+            router.push('/(tabs)');
         }
-      });
-
-      if (response.status === 200) {
-        // Suppression du token localement après déconnexion réussie
-        await AsyncStorage.removeItem('token');
-        setIsLogged(false);
-        router.push('/(tabs)/');
-      } 
-      
-      else {
-        console.error("Erreur lors de la déconnexion: statut de réponse inattendu", response.status);
-      }
-    } 
-    
-    catch (error) {
-      console.error("Erreur lors de la déconnexion:", error);
+    } catch (error) {
+        console.error("Erreur lors de la déconnexion:", error);
     }
   };
 
 
-
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
 
   return (
-    <AuthContext.Provider
-      value={{
-        isLogged,
-        loading,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ isAuthenticated, checkAuthStatus, logout }}>
       {children}
     </AuthContext.Provider>
   );

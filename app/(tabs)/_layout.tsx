@@ -4,16 +4,9 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import  Colors  from "@/constants/Colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../../context/AuthContext';
 import { ActivityIndicator } from 'react-native';
 
 export default function  Layout() {
-
-    const { isLogged, user, loading } = useAuth();
-
-    if (loading) {
-        return <ActivityIndicator size="small" color={Colors.primaryColor} />;
-    }
 
     return(
         <Tabs screenOptions={{

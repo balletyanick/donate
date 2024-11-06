@@ -1,21 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
-import { Stack, router } from 'expo-router';
+import { Stack, router, Redirect } from 'expo-router';
 import { useHeaderHeight } from '@react-navigation/elements';
 import DropDownPicker from 'react-native-dropdown-picker';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { AuthContext } from '../../context/AuthContext';
 
 export default function UploadImage() {
   const headerHeight = useHeaderHeight(); 
   const [open, setOpen] = useState(false); // Dropdown
   const [value, setValue] = useState(null); // Dropdown
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const authContext = useContext(AuthContext);
+  const { isAuthenticated, checkAuthStatus, logout } = authContext;
+  if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
 
   const onChangeDate = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate;
@@ -115,7 +119,7 @@ export default function UploadImage() {
   const handleSubmit = async () => {
     if (validateForm()) {
       const formData = new FormData(); 
-      formData.append('picture', {
+      formData.append('avatar', {
         uri: image,
         name: 'image.jpg',
         type: 'image/jpeg'
@@ -127,13 +131,11 @@ export default function UploadImage() {
       formData.append('city', city);
       formData.append('link_justify', link_justify);
       formData.append('date_end', date.toISOString().split('T')[0]);
+
+      console.log(formData)
   
       try {
         const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
-
-        if (!token) {
-          setServerError("Problème d'authentification");
-        }
   
         const response = await axios.post('http://localhost:8000/api/add_cagnotte', formData, {
           headers: {
@@ -149,6 +151,7 @@ export default function UploadImage() {
       } 
       
       catch (error) {
+        console.log('Erreur lors de l\'envoi des données:', error);
         setServerError("Problème de connexion internet");
       }
     }

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link, Stack, router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import  Colors  from "@/constants/Colors";
 import {useHeaderHeight} from '@react-navigation/elements';
@@ -8,13 +8,24 @@ import CategoriesButtons from '../../components/CategoriesButton';
 import List_demande from '../../components/List_demande';
 import List_ong from '../../components/List_ong';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../../context/AuthContext';
 import { ActivityIndicator } from 'react-native';
+import { AuthContext } from '../../context/AuthContext';
 
 const Page: React.FC = () => {
 
     const headerHeight = useHeaderHeight(); 
-    const { isLogged, loading } = useAuth();
+    const authContext = useContext(AuthContext);
+
+    if (!authContext) {
+        router.push('/(ProfilePage)/historique');
+    }
+
+    const { isAuthenticated, checkAuthStatus } = authContext;
+
+    useEffect(() => {
+      // Vérifie l'état de connexion à chaque chargement
+      checkAuthStatus();
+    }, []);
     
     return (
         <>
@@ -24,7 +35,7 @@ const Page: React.FC = () => {
             headerTitle: "",
             headerLeft: () => (
                 <TouchableOpacity onPress={() => {}}  style={{ marginLeft:20 }}>
-                    {isLogged ? (
+                    {isAuthenticated ? (
                         <Image source={require('../../assets/images/avatar.jpg')}
                         style={{width:40, height:40, borderRadius:10}}
                     /> 
@@ -51,7 +62,7 @@ const Page: React.FC = () => {
             <ScrollView showsVerticalScrollIndicator={false}> 
 
                 <View style={styles.textContainer}>
-                    {isLogged ? (
+                    {isAuthenticated ? (
                         <Text style={styles.headTxt}>
                             Donnez avec le cœur, changez des vies.. 
                         </Text>
