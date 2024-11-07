@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Link, Stack, router } from 'expo-router';
 import React, { useEffect, useState, useContext } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import  Colors  from "@/constants/Colors";
@@ -10,17 +9,15 @@ import List_ong from '../../components/List_ong';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
+import { Stack, router, Redirect } from 'expo-router';
 
+ 
 const Page: React.FC = () => {
 
     const headerHeight = useHeaderHeight(); 
     const authContext = useContext(AuthContext);
-
-    if (!authContext) {
-        router.push('/(ProfilePage)/historique');
-    }
-
     const { isAuthenticated, checkAuthStatus } = authContext;
+
 
     useEffect(() => {
       // Vérifie l'état de connexion à chaque chargement

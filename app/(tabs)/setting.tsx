@@ -12,12 +12,17 @@ import { ActivityIndicator } from 'react-native';
 
 const Page: React.FC = () => {
 
-  const headerHeight = useHeaderHeight();
-  const authContext = useContext(AuthContext);
+  const headerHeight = useHeaderHeight(); //hauteur
 
+  // Verification Auth
+  const authContext = useContext(AuthContext);
   const { isAuthenticated, checkAuthStatus, logout } = authContext;
   if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
 
+  useEffect(() => {
+    // Vérifie l'état de connexion à chaque chargement
+    checkAuthStatus();
+  }, []);
 
   return (
     <>

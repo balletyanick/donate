@@ -17,6 +17,7 @@ export default function UploadImage() {
   const [value, setValue] = useState(null); // Dropdown
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Verification Auth
   const authContext = useContext(AuthContext);
   const { isAuthenticated, checkAuthStatus, logout } = authContext;
   if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
@@ -137,7 +138,7 @@ export default function UploadImage() {
       try {
         const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
   
-        const response = await axios.post('http://localhost:8000/api/add_cagnotte', formData, {
+        const response = await axios.post('http://10.0.2.2:8000/api/add_cagnotte', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
