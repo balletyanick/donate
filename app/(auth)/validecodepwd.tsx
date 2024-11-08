@@ -191,6 +191,7 @@ export default function ValiderCode() {
               style={styles.input}
               value={verification_code}
               onChangeText={setVerification_code}
+              keyboardType="numeric"
             />
           </View>
           {errors.verification_code ? <Text style={styles.errorText}>{errors.verification_code}</Text> : null}

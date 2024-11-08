@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import { Stack, router, Redirect } from 'expo-router';
@@ -10,6 +10,9 @@ import axios from 'axios';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../context/AuthContext';
+import * as FileSystem from 'expo-file-system';
+import { ActivityIndicator } from 'react-native';
+
 
 export default function UploadImage() {
   const headerHeight = useHeaderHeight(); 
@@ -21,6 +24,11 @@ export default function UploadImage() {
   const authContext = useContext(AuthContext);
   const { isAuthenticated, checkAuthStatus, logout } = authContext;
   if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
+
+  useEffect(() => {
+    // Vérifie l'état de connexion à chaque chargement
+    checkAuthStatus();
+  }, []);
 
   const onChangeDate = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate;
@@ -41,12 +49,15 @@ export default function UploadImage() {
   const [city, setCity] = useState('');
   const [link_justify, setLink_justify] = useState('');
   const [date, setDate] = useState(new Date());
+  const [loading, setLoading] = useState(false);  // chargement
 
 
   // États pour gérer les erreurs
   const [errors, setErrors] = useState({ image: '', title: '', description: '', 
   category: '', amount: '', city: '', link_justify:'', date:''});
   const [serverError, setServerError] = useState('');
+  const [error, setError] = useState(''); 
+
 
 
   const validateForm = () => {
@@ -80,12 +91,12 @@ export default function UploadImage() {
       newErrors.category = 'Veuillez sélectionner une catégorie.';
       valid = false;
     }
-  
+
     if (!amount) {
       newErrors.amount = 'Le montant est obligatoire.';
       valid = false;
-    } else if (amount.length < 3) {
-      newErrors.amount = 'Le montant doit contenir au moins 3 caractères.';
+    } else if (amount.length < 4) {
+      newErrors.amount = 'Le montant doit contenir au moins 4 caractères.';
       valid = false;
     }
   
@@ -96,35 +107,91 @@ export default function UploadImage() {
       newErrors.city = 'La localisation doit contenir au moins 3 caractères.';
       valid = false;
     }
+
+    if (date <= today) {
+      newErrors.date = 'La date de fin doit être supérieure à aujourd\'hui.';
+      valid = false;
+    } else if (!date) {
+      newErrors.date = 'Veuillez sélectionner une date';
+      valid = false;
+    }
+
     setErrors(newErrors);
     return valid;
   };
 
-  const UploadImg = async () => {
-    // demande de permission
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.granted === false) {
-      alert("L'autorisation d'accéder aux photos est requise !");
-      return;
-    }
-    // Ouvrir le sélecteur d'images
-    const result = await ImagePicker.launchImageLibraryAsync();
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+  const selectImage = async () => {
+    const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permission.granted) {
+            openImagePicker();
+        } else {
+            Alert.alert('Permission refusée', 'Veuillez autoriser l\'accès à la galerie pour télécharger une image.');
+        }
+    } else {
+        openImagePicker();
     }
   };  
 
+  const openImagePicker = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+    });
+
+    if (!result.canceled) {
+        setImage(result.assets[0].uri);
+    }
+  };
+
+  const resetForm = () => {
+    setImage(null);
+    setTitle('');
+    setDescription('');
+    setAmount('');
+    setCity('');
+    setValue(null);
+    setDate(new Date());
+  };
 
   const handleSubmit = async () => {
     if (validateForm()) {
-      const formData = new FormData(); 
-      formData.append('avatar', {
-        uri: image,
-        name: 'image.jpg',
-        type: 'image/jpeg'
+
+      if (!image) {
+        setError('Veuillez sélectionner une image avant de la télécharger.'); 
+        return;
+      }
+
+      const fileInfo = await FileSystem.getInfoAsync(image);
+      const fileSizeInMB = fileInfo.size / (1024 * 1024); 
+
+      if (fileSizeInMB > 10) {
+        setError('La taille de l\'image ne doit pas dépasser 10 Mo.'); 
+        return;
+      }
+
+      const filename = image.split('/').pop();
+      const match = /\.(jpg|jpeg|png)$/i.exec(filename || '');
+      if (!match) {
+        setError('Seuls les images de type JPG, PNG et JPEG sont autorisés.'); 
+        return;
+      }
+
+      const token = await AsyncStorage.getItem('userToken');
+
+      const formData = new FormData();
+      const localUri = image;
+      const fileName = localUri.split('/').pop();
+      const type = `image/${match[1].toLowerCase()}`;
+  
+      formData.append('picture', {
+        uri: localUri,
+        type: type,
+        name: fileName,
       });
+  
       formData.append('title', title);
       formData.append('description', description);
       formData.append('category', value);
@@ -133,11 +200,8 @@ export default function UploadImage() {
       formData.append('link_justify', link_justify);
       formData.append('date_end', date.toISOString().split('T')[0]);
 
-      console.log(formData)
-  
       try {
-        const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
-  
+        setLoading(true);
         const response = await axios.post('http://10.0.2.2:8000/api/add_cagnotte', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -145,29 +209,28 @@ export default function UploadImage() {
           },
         });
   
-        if (response.status === 200) {
-          alert('Cagnotte ajoutée avec succès');
+        if (response.status === 201) {
+          resetForm();
           router.push('/(tabs)/'); // exemple de redirection
         }
       } 
       
       catch (error) {
-        console.log('Erreur lors de l\'envoi des données:', error);
         setServerError("Problème de connexion internet");
+      }
+
+      finally {
+        setLoading(false); // Arrête le chargement après la requête
       }
     }
   };
-  
-
-
-
  
 
   return (
     <>
       <Stack.Screen options={{
         headerTransparent: true,
-        headerTitle: "Démarrer une Cagnottes",
+        headerTitle: "Démarrer une cagnottes",
         headerLeft: () => (
           <TouchableOpacity onPress={() => router.back()}>
             <View>
@@ -180,7 +243,7 @@ export default function UploadImage() {
         <KeyboardAvoidingView style={[styles.container, { paddingTop: headerHeight }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <ScrollView showsVerticalScrollIndicator={false}>
 
-            <TouchableOpacity style={image ? styles.uploadBoxSelected : styles.uploadBox} onPress={UploadImg}>
+            <TouchableOpacity style={image ? styles.uploadBoxSelected : styles.uploadBox} onPress={selectImage}>
               {image ? (
                 <Image source={{ uri: image }} style={styles.image} />
               ) : (
@@ -193,7 +256,7 @@ export default function UploadImage() {
             </TouchableOpacity>
 
             <View style={styles.boxinput}>
-              <Text> title </Text>
+              <Text> Titre </Text>
               <TextInput  
                 placeholder='Saisir le title' 
                 placeholderTextColor='#11182744'  
@@ -242,6 +305,7 @@ export default function UploadImage() {
                 style={styles.input}
                 value={amount}
                 onChangeText={setAmount}
+                keyboardType="numeric"
               />
             {errors.amount ? <Text style={styles.errorText}>{errors.amount}</Text> : null}
             </View>
@@ -288,8 +352,11 @@ export default function UploadImage() {
               {serverError && (<Text style={styles.errorText}> {serverError} </Text> )}
             </View>
 
-            <TouchableOpacity style={styles.button}  onPress={handleSubmit}>
-              <Text style={styles.buttonText}> Enregistrer </Text>
+            <TouchableOpacity style={styles.button}  onPress={handleSubmit} disabled={loading}>
+              {
+                loading ? ( <ActivityIndicator size="small" color={Colors.white} />) : ( 
+                <Text style={styles.buttonText}> Enregistrer </Text> )
+              }
             </TouchableOpacity>
 
           </ScrollView>
@@ -308,8 +375,8 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 180,
     borderWidth: 2,
-    borderColor: Colors.bgColor,
-    borderStyle: "solid",
+    borderColor: Colors.black,
+    borderStyle: "dashed",
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',

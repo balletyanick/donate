@@ -99,7 +99,6 @@ const UploadImage = () => {
         },
       });
 
-      setLoading(false);
       if (response.status === 200) {
         router.push('/(tabs)/setting'); 
       } 
@@ -118,16 +117,16 @@ const UploadImage = () => {
     <>
       <Stack.Screen options={{
         headerTransparent: true,
-        headerTitle: "Avatar",
+        headerTitle: "Ajouter un avatar",
         headerLeft: () => (
           <TouchableOpacity onPress={() => router.back()}>
-            <Feather name="arrow-left" size={20} />
+            <Feather name="arrow-left" size={20} style={{ marginRight: 15 }}/>
           </TouchableOpacity>
         ),
       }} />
 
       <View style={[styles.container, { paddingTop: headerHeight }]}>
-        <TouchableOpacity style={styles.uploadBox} onPress={selectImage}>
+        <TouchableOpacity style={image ? styles.uploadBoxSelected : styles.uploadBox} onPress={selectImage}>
           {image ? (
             <Image source={{ uri: image }} style={styles.image} />
           ) : (
@@ -169,10 +168,25 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
+    marginTop: 20,
     marginBottom: 20,
     backgroundColor: '#F5F5F5',
   },
+
+  uploadBoxSelected: {
+    width: 300,
+    height: 200,
+    borderWidth: 2,
+    borderColor: Colors.bgColor,
+    borderStyle: "solid",
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+    backgroundColor: '#F5F5F5',
+  },
+
   uploadText: {
     color: Colors.black,
     marginTop: 10,

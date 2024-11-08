@@ -13,94 +13,98 @@ import { Stack, router, Redirect } from 'expo-router';
 
  
 const Page: React.FC = () => {
-
     const headerHeight = useHeaderHeight(); 
     const authContext = useContext(AuthContext);
-    const { isAuthenticated, checkAuthStatus } = authContext;
-
+    const { isAuthenticated, userData, checkAuthStatus } = authContext; // Récupérer userData
 
     useEffect(() => {
-      // Vérifie l'état de connexion à chaque chargement
+      // Vérifie l'état de connexion et récupère les données utilisateur à chaque chargement
       checkAuthStatus();
+      console.log("Données utilisateur dans le composant Page :", userData); 
     }, []);
-    
+
     return (
         <>
         <Stack.Screen options={{
-
             headerTransparent: true,
             headerTitle: "",
             headerLeft: () => (
-                <TouchableOpacity onPress={() => {}}  style={{ marginLeft:20 }}>
-                    {isAuthenticated ? (
-                        <Image source={require('../../assets/images/avatar.jpg')}
-                        style={{width:40, height:40, borderRadius:10}}
-                    /> 
-                    ):(
-                    <Ionicons name='person-circle-outline'
-                        size={22} color={Colors.black} style={styles.IconNotif}
-                    />
+                <TouchableOpacity onPress={() => {}} style={{ marginLeft: 20 }}>
+                    {isAuthenticated && userData ? (
+                        <Image
+                            source={{ uri: userData.data.avatar ? `http://10.0.2.2:8000/storage/${userData.data.avatar}` : 'https://via.placeholder.com/40' }}
+                            style={{ width: 40, height: 40, borderRadius: 10 }}
+                        />
+                    ) : (
+                        <Ionicons
+                            name='person-circle-outline'
+                            size={25}
+                            color={Colors.black}
+                            style={styles.IconNotif}
+                        />
                     )}
                 </TouchableOpacity>
             ),
 
             headerRight: () => (
-                <TouchableOpacity onPress={() => {router.push('/login')}}  style={{ marginLeft:20 }}>
-                    <Ionicons  
+                <TouchableOpacity onPress={() => { router.push('/login') }} style={{ marginLeft: 20 }}>
+                    <Ionicons
                         name='notifications-outline'
-                        size={22} color={Colors.black} style={styles.IconNotif}
+                        size={22}
+                        color={Colors.black}
+                        style={styles.IconNotif}
                     />
                 </TouchableOpacity>
             ),
         }} 
         />
 
-        <View style={[styles.container, {paddingTop: headerHeight}]}>
+        <View style={[styles.container, { paddingTop: headerHeight }]}>
             <ScrollView showsVerticalScrollIndicator={false}> 
 
                 <View style={styles.textContainer}>
-                    {isAuthenticated ? (
-                        <Text style={styles.headTxt}>
-                            Donnez avec le cœur, changez des vies.. 
-                        </Text>
+                    {isAuthenticated && userData ? (
+                        <>
+                            <Text style={styles.headTxt}>
+                            {userData.data.first_name} ,donnez avec le cœur et changez des vies.. 
+                            </Text>
+                        </>
                     ) : (
                         <Text style={styles.headTxt}>
                             Donnez avec le cœur, changez des vies.
                         </Text>
                     )}
-                    <View style={styles.boxSearch} >
-
-                        <View style={styles.BarSearch} >
-                            <Ionicons  
-                                name='search' 
-                                size={22} 
-                                style={{ marginRight:5, position:'relative', top:2 }} 
-                                color={ Colors.black } 
-                                />
-                            <TextInput  placeholder='Recherche ...' placeholderTextColor='gray' />
+                    <View style={styles.boxSearch}>
+                        <View style={styles.BarSearch}>
+                            <Ionicons
+                                name='search'
+                                size={22}
+                                style={{ marginRight: 5, position: 'relative', top: 2 }}
+                                color={Colors.black}
+                            />
+                            <TextInput placeholder='Recherche ...' placeholderTextColor='gray' />
                         </View>
 
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             onPress={() => {}}
-                            style={ styles.filtreBtn }
-                            >
-                            <Ionicons name='options' color={ Colors.white } size={28}/>
-                        </TouchableOpacity> 
+                            style={styles.filtreBtn}
+                        >
+                            <Ionicons name='options' color={Colors.white} size={28} />
+                        </TouchableOpacity>
                     </View>
                 </View>
+                
 
-                <CategoriesButtons/>
-
-                <List_demande/>
-
-                <List_ong/>
+                <CategoriesButtons />
+                <List_demande />
+                <List_ong />
 
             </ScrollView>
         </View>
-
         </>
-  );
+    );
 };
+
 
 
 

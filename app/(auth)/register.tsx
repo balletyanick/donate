@@ -203,6 +203,7 @@ export default function Register() {
                   style={styles.input}
                   value={phone}
                   onChangeText={setPhone}
+                  keyboardType="numeric"
                 />
               </View>
               {errors.phone ? <Text style={styles.errorText}>{errors.phone}</Text> : null}

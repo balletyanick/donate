@@ -1,8 +1,10 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import React from 'react';
-import { Stack, router } from 'expo-router';
 import Colors from "@/constants/Colors";
 import Onboarding from 'react-native-onboarding-swiper';
+import { Stack, router, Redirect } from 'expo-router';
+import { AuthContext } from '../context/AuthContext';
+import React, { useEffect, useState, useContext } from 'react';
+
 
 const Done = ({ ...props }) => (
   <TouchableOpacity 
@@ -14,6 +16,15 @@ const Done = ({ ...props }) => (
 );
 
 export default function notice() {
+  const authContext = useContext(AuthContext);
+  const { isAuthenticated, checkAuthStatus } = authContext;
+  if (isAuthenticated) return <Redirect href="/(tabs)/" />;
+
+  useEffect(() => {
+      checkAuthStatus();
+  }, []);
+
+
   return (
     <>
     <Stack.Screen options={{

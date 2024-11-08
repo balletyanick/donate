@@ -16,12 +16,13 @@ const Page: React.FC = () => {
 
   // Verification Auth
   const authContext = useContext(AuthContext);
-  const { isAuthenticated, checkAuthStatus, logout } = authContext;
+  const { isAuthenticated, checkAuthStatus, logout, userData } = authContext;
   if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
 
   useEffect(() => {
     // Vérifie l'état de connexion à chaque chargement
     checkAuthStatus();
+    console.log("Données utilisateur dans le composant Page :", userData); 
   }, []);
 
   return (
@@ -40,10 +41,17 @@ const Page: React.FC = () => {
         {/* Profil Section */}
         <View style={styles.profileCard}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image 
-              source={require('../../assets/images/avatar.jpg')} 
-              style={styles.image}
-            />
+            {isAuthenticated && userData ? (  
+              <Image 
+                source={{ uri: userData.data.avatar ? `http://10.0.2.2:8000/storage/${userData.data.avatar}` : 'https://via.placeholder.com/40' }} 
+                style={styles.image}
+              />
+            ) : ( 
+              <Image 
+                source={require('../../assets/images/avatar.jpg')} 
+                style={styles.image}
+              />
+            )}
             <View style={styles.textContainer}>
               <Text style={styles.nom}>Ballet Yanick  </Text>
               <Text style={styles.role}>Donnateur  </Text>
