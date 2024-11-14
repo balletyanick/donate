@@ -94,15 +94,15 @@ export default function Register() {
         if (response.status === 201) {
           router.push('/(auth)/validecode'); // Redirection vers une autre page
         } 
-        else if (response.status === 409) {
-          setServerError("Le numéro de téléphone est déjà utilisé par un autre utilisateur.");
-          return;
-        } 
-
       }
       
       catch (error) {
-        setServerError('Problème de connexion internet');
+        if (error.response.status === 409) {
+          setServerError("Le numéro de téléphone est déjà utilisé par un autre utilisateur.");
+        } 
+        else {
+          setServerError('Problème de connexion internet');
+        }
       }
 
       finally {

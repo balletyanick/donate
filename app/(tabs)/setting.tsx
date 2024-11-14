@@ -22,7 +22,6 @@ const Page: React.FC = () => {
   useEffect(() => {
     // Vérifie l'état de connexion à chaque chargement
     checkAuthStatus();
-    console.log("Données utilisateur dans le composant Page :", userData); 
   }, []);
 
   return (

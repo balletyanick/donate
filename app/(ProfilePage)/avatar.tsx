@@ -105,7 +105,12 @@ const UploadImage = () => {
     } 
     
     catch (error) {
-      setError('Problème de connexion internet'); 
+      if (error.response.status === 403) {
+        setServerError("Votre compte n\'est pas vérifié. Veuillez réinitialiser votre mot de passe.");
+      } 
+      else {
+        setServerError('Problème de connexion internet');
+      }
     }
 
     finally {
@@ -141,6 +146,7 @@ const UploadImage = () => {
 
         {/* Affichage de l'erreur en texte rouge */}
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {serverError && (<Text style={styles.errorText}> {serverError} </Text> )}
 
         <TouchableOpacity style={styles.uploadButton}onPress={upload} disabled={loading}>
           {

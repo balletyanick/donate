@@ -20,7 +20,6 @@ const Page: React.FC = () => {
     useEffect(() => {
       // Vérifie l'état de connexion et récupère les données utilisateur à chaque chargement
       checkAuthStatus();
-      console.log("Données utilisateur dans le composant Page :", userData); 
     }, []);
 
     return (
@@ -66,7 +65,7 @@ const Page: React.FC = () => {
                     {isAuthenticated && userData ? (
                         <>
                             <Text style={styles.headTxt}>
-                            {userData.data.first_name} ,donnez avec le cœur et changez des vies.. 
+                            {userData.data.first_name} donnez avec le cœur et changez des vies.. 
                             </Text>
                         </>
                     ) : (

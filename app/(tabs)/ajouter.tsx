@@ -11,7 +11,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../../context/AuthContext';
 import * as FileSystem from 'expo-file-system';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Modal } from 'react-native';
 
 
 export default function UploadImage() {
@@ -216,7 +216,12 @@ export default function UploadImage() {
       } 
       
       catch (error) {
-        setServerError("Problème de connexion internet");
+        if (error.response.status === 403) {
+          setServerError("Votre compte n\'est pas vérifié. Veuillez réinitialiser votre mot de passe.");
+        } 
+        else {
+          setServerError('Problème de connexion internet');
+        }
       }
 
       finally {
@@ -354,7 +359,12 @@ export default function UploadImage() {
 
             <TouchableOpacity style={styles.button}  onPress={handleSubmit} disabled={loading}>
               {
-                loading ? ( <ActivityIndicator size="small" color={Colors.white} />) : ( 
+                loading ? (  
+                  <Modal transparent={true} animationType="fade">
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                      <ActivityIndicator size="large" color={Colors.primaryColor} />
+                    </View>
+                  </Modal>) : ( 
                 <Text style={styles.buttonText}> Enregistrer </Text> )
               }
             </TouchableOpacity>

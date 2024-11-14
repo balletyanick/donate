@@ -63,15 +63,17 @@ export default function Login() {
         if (response.status === 200) {
           router.push('/(auth)/validecode'); 
         } 
-        else if (response.status === 401) {
-          setServerError("Numéro de téléphone ou mot de passe incorrect");
-          return;
-        } 
       }
       
       catch (error) {
-        setServerError('Problème de connexion internet');
+        if (error.response.status === 401) {
+          setServerError("Numéro de téléphone ou mot de passe incorrect");
+        } 
+        else {
+          setServerError('Problème de connexion internet');
+        }
       }
+      
 
       finally {
         setIsLoading(false); // Arrête le chargement après la requête
