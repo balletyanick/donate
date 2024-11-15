@@ -202,7 +202,7 @@ export default function UploadImage() {
 
       try {
         setLoading(true);
-        const response = await axios.post('http://10.0.2.2:8000/api/add_cagnotte', formData, {
+        const response = await axios.post('https://donate.balambio.com/api/add_cagnotte', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,

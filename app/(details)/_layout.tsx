@@ -5,7 +5,7 @@ const DetailLayout = () => {
   return (
     <>
       <Stack>
-        <Stack.Screen name="detail" />
+        <Stack.Screen name="[id]" />
       </Stack>
     </>
   );

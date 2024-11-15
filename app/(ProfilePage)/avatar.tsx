@@ -92,7 +92,7 @@ const UploadImage = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post('http://10.0.2.2:8000/api/upload_avatar', formData, {
+      const response = await axios.post('https://donate.balambio.com/api/upload_avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`,

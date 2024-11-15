@@ -31,7 +31,7 @@ const Page: React.FC = () => {
                 <TouchableOpacity onPress={() => {}} style={{ marginLeft: 20 }}>
                     {isAuthenticated && userData ? (
                         <Image
-                            source={{ uri: userData.data.avatar ? `http://10.0.2.2:8000/storage/${userData.data.avatar}` : 'https://via.placeholder.com/40' }}
+                            source={{ uri: userData.data.avatar ? `http://localhost:8000/storage/${userData.data.avatar}` : 'https://via.placeholder.com/40' }}
                             style={{ width: 40, height: 40, borderRadius: 10 }}
                         />
                     ) : (

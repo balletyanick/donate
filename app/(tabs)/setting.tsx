@@ -42,7 +42,7 @@ const Page: React.FC = () => {
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {isAuthenticated && userData ? (  
               <Image 
-                source={{ uri: userData.data.avatar ? `http://10.0.2.2:8000/storage/${userData.data.avatar}` : 'https://via.placeholder.com/40' }} 
+                source={{ uri: userData.data.avatar ? `https://donate.balambio.com/storage/${userData.data.avatar}` : 'https://via.placeholder.com/40' }} 
                 style={styles.image}
               />
             ) : ( 

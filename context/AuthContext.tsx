@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     try {
         const token = await AsyncStorage.getItem('userToken');
-        const response = await axios.post('http://10.0.2.2:8000/api/logout', {}, {
+        const response = await axios.post('http://localhost:8000/api/logout', {}, { 
             headers: {
               Authorization: `Bearer ${token}`,
             }
@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       if (token) {
-        const response = await axios.get('http://10.0.2.2:8000/api/user_info', {
+        const response = await axios.get('http://localhost:8000/api/user_info', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

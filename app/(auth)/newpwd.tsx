@@ -52,7 +52,7 @@ export default function NewPassword() {
     
           // Envoyer le code de vérification au serveur
           const response = await axios.post(
-            'http://10.0.2.2:8000/api/password_reset',{ password },
+            'https://donate.balambio.com/api/password_reset',{ password },
             {
               headers: {
                 Authorization: `Bearer ${token}`,

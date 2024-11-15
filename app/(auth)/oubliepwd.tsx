@@ -41,7 +41,7 @@ export default function oubliepwd() {
     if (validateForm()) {
       try {
         setIsLoading(true); // demarrage chargement
-        const response = await axios.post('http://10.0.2.2:8000/api/request_reset', {
+        const response = await axios.post('https://donate.balambio.com/api/request_reset', {
           phone,
         });
 

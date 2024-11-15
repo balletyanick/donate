@@ -4,11 +4,14 @@ import { Link, Stack, router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 const {width} = Dimensions.get('window');
 const IMG_HEIGHT = 300
 
 const Detail = () => {
+  const { id } = useLocalSearchParams();
+
   return (
     <>
     <Stack.Screen options={{
@@ -43,7 +46,7 @@ const Detail = () => {
 
         <View style={styles.container}>
           
-          <Text style={styles.Txt1}> Manque de livre  </Text>
+          <Text style={styles.Txt1}> Manque de livre {id} </Text>
           <View style={styles.boxContainer}>
             <View style={styles.box1}>
               <FontAwesome5 name="map-marker-alt" size= {18} color={Colors.primaryColor}/>

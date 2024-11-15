@@ -17,7 +17,7 @@ const List_demand = () => {
     const fetchCagnottes = async () => {
       try {
         setIsLoading(true); // demarrage chargement
-        const response = await axios.get('http://10.0.2.2:8000/api/afficher_all_cagnotte_active'); 
+        const response = await axios.get('http://localhost:8000/api/afficher_all_cagnotte_active'); 
 
         if (response.status === 200) {
           setCagnottes(response.data.data);
@@ -52,12 +52,12 @@ const List_demand = () => {
               key={index}
               style={styles.container}
               onPress={() => {
-                router.push(`/(details)/detail`); // Rediriger vers une page de détails
+                router.push(`/(details)/${cagnotte.id}`); // Rediriger vers une page de détails
               }}
             >
               <View style={styles.boxImage}>
                 <Image
-                  source={{ uri: cagnotte.picture ? `http://10.0.2.2:8000/storage/${cagnotte.picture}` : 'https://via.placeholder.com/40' }}
+                  source={{ uri: cagnotte.picture ? `http://localhost:8000/storage/${cagnotte.picture}` : 'https://via.placeholder.com/40' }}
                   style={styles.image}
                 />
                 <View style={styles.bookmark}>
