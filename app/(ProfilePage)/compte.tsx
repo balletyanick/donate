@@ -115,7 +115,7 @@ export default function Register() {
               onPress={() => setPasswordVisible(!passwordVisible)} 
               style={styles.eyeIcon}>
 
-              <Ionicons
+              <Ionicons 
                 name={passwordVisible ? 'eye-off' : 'eye'}
                 size={24}
                 color="gray" />

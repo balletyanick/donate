@@ -19,7 +19,6 @@ const UploadImage = () => {
   // Verification Auth
   const authContext = useContext(AuthContext);
   const { isAuthenticated, checkAuthStatus, logout } = authContext;
-  if (!isAuthenticated) return <Redirect href="/(tabs)/" />;
 
   useEffect(() => {
     // Vérifie l'état de connexion à chaque chargement

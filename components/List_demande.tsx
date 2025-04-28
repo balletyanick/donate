@@ -17,7 +17,7 @@ const List_demand = () => {
     const fetchCagnottes = async () => {
       try {
         setIsLoading(true); // demarrage chargement
-        const response = await axios.get('http://localhost:8000/api/afficher_all_cagnotte_active'); 
+        const response = await axios.get('https://donate.balambio.com/api/afficher_all_cagnotte_active'); 
 
         if (response.status === 200) {
           setCagnottes(response.data.data);

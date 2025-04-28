@@ -23,7 +23,6 @@ export default function UploadImage() {
   // Verification Auth
   const authContext = useContext(AuthContext);
   const { isAuthenticated, checkAuthStatus, logout } = authContext;
-  if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
 
   useEffect(() => {
     // Vérifie l'état de connexion à chaque chargement
@@ -45,6 +44,7 @@ export default function UploadImage() {
     { label: 'Soins de santé', value: 'Soins de santé' }, { label: 'Art & Culture', value: 'Art & Culture' },
     { label: 'Autre', value: 'Autre' },
   ]);
+
   const [amount, setAmount] = useState('');
   const [city, setCity] = useState('');
   const [link_justify, setLink_justify] = useState('');

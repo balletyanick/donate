@@ -17,7 +17,6 @@ const Page: React.FC = () => {
   // Verification Auth
   const authContext = useContext(AuthContext);
   const { isAuthenticated, checkAuthStatus, logout, userData } = authContext;
-  if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
 
   useEffect(() => {
     // Vérifie l'état de connexion à chaque chargement

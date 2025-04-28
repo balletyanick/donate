@@ -44,7 +44,7 @@ export default function NewPassword() {
           
           setIsLoading(true); // demarrage chargement
           const token = await AsyncStorage.getItem('userToken'); // Récupérer le token depuis AsyncStorage
-    
+     
           if (!token) {
             setServerError("Erreur d'authentification, veuillez réessayer.");
             return;
